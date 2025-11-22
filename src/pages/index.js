@@ -1,78 +1,167 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import { useState } from "react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const sampleTodos = [
+  {
+    id: 1700445601,
+    title: "Grocery Shopping",
+    description: "Pick up milk, eggs, cheese, and fresh produce from the market.",
+    date: "November 20, 2025 09:23 PM",
+    completed: false,
+  },
+  {
+    id: 1700445602,
+    title: "Pay Utility Bills",
+    description: "Ensure electricity and internet bills are paid before the due date (Friday).",
+    date: "November 20, 2025 09:23 PM",
+    completed: false,
+  },
+  {
+    id: 1700445603,
+    title: "Call Mom",
+    description: "Check in and finalize plans for the upcoming holiday weekend.",
+    date: "November 20, 2025 09:23 PM",
+    completed: false,
+  },
+  {
+    id: 1700445604,
+    title: "Car Wash",
+    description: "Take the car to the wash and check the tire pressure.",
+    date: "November 20, 2025 09:23 PM",
+    completed: false,
+  },
+  {
+    id: 1700445605,
+    title: "Book Appointment",
+    description: "Schedule the annual physical check-up with Dr. Peterson.",
+    date: "November 20, 2025 09:23 PM",
+    completed: false,
+  },
+];
 
 export default function Home() {
+  const [todos, setTodos] = useState(sampleTodos);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("todo");
+  const [editingId, setEditingId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const [editingDesc, setEditingDesc] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+
+  const addTodo = () => {
+    if (!newTitle.trim()) return;
+    const next = {
+      id: Date.now(),
+      title: newTitle,
+      description: "",
+      date: new Date().toLocaleString(),
+      completed: false,
+    };
+    setTodos([next, ...todos]);
+    setNewTitle("");
+  };
+
+  const deleteTodo = (id) => setTodos(todos.filter((t) => t.id !== id));
+
+  const toggleComplete = (id) =>
+    setTodos(todos.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
+
+  const startEditing = (t) => {
+    setEditingId(t.id);
+    setEditingTitle(t.title);
+    setEditingDesc(t.description);
+  };
+
+  const saveEdit = (id) => {
+    setTodos(
+      todos.map((t) => (t.id === id ? { ...t, title: editingTitle, description: editingDesc } : t))
+    );
+    setEditingId(null);
+  };
+
+  const filtered = todos
+    .filter((t) => (filter === "completed" ? t.completed : !t.completed))
+    .filter((t) => {
+      const q = query.toLowerCase();
+      return (
+        t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q) || String(t.id).includes(q)
+      );
+    });
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="app-container">
+      <div className="topbar">
+        <input
+          className="search-input"
+          placeholder="Search..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the index.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <input
+          className="search-input"
+          placeholder="New todo title..."
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          style={{ maxWidth: 320 }}
+        />
+        <button className="add-btn" onClick={addTodo}>
+          Add Todo
+        </button>
+      </div>
+
+      <div className="tabs">
+        <button className={`tab ${filter === "todo" ? "active" : ""}`} onClick={() => setFilter("todo")}>Todos</button>
+        <button className={`tab ${filter === "completed" ? "active" : ""}`} onClick={() => setFilter("completed")}>Completed</button>
+      </div>
+
+      <table className="todo-table">
+        <thead>
+          <tr>
+            <th style={{ width: 110 }}>ID</th>
+            <th style={{ width: 180 }}>Title</th>
+            <th>Description</th>
+            <th style={{ width: 220 }}>Date Created/Updated</th>
+            <th style={{ width: 180 }}>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.map((t) => (
+            <tr key={t.id}>
+              <td>{t.id}</td>
+              <td>
+                {editingId === t.id ? (
+                  <input value={editingTitle} onChange={(e) => setEditingTitle(e.target.value)} />
+                ) : (
+                  <div className="todo-row-title">{t.title}</div>
+                )}
+              </td>
+              <td>
+                {editingId === t.id ? (
+                  <input value={editingDesc} onChange={(e) => setEditingDesc(e.target.value)} style={{ width: '100%' }} />
+                ) : (
+                  <div className="todo-row-desc">{t.description}</div>
+                )}
+              </td>
+              <td>{t.date}</td>
+              <td>
+                <div className="actions">
+                  {editingId === t.id ? (
+                    <>
+                      <button className="action-btn btn-edit" onClick={() => saveEdit(t.id)}>Save</button>
+                      <button className="action-btn" onClick={() => setEditingId(null)}>Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="action-btn btn-edit" onClick={() => startEditing(t)}>Edit</button>
+                      <button className="action-btn btn-delete" onClick={() => deleteTodo(t.id)}>Delete</button>
+                      <button className="action-btn btn-complete" onClick={() => toggleComplete(t.id)}>✔</button>
+                    </>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
